@@ -34,7 +34,10 @@ const voiceStore = useVoiceChatStore()
 
 const typeMessage = ref('')
 function onSubmit() {
-  voiceStore.addResult(typeMessage.value)
-  typeMessage.value = ''
+  if (typeMessage.value) {
+    voiceStore.addResult(typeMessage.value)
+    voiceStore.fetchAI(typeMessage.value)
+    typeMessage.value = ''
+  }
 }
 </script>

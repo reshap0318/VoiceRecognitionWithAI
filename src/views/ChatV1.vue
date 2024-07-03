@@ -20,10 +20,18 @@
                     </p>
                   </div>
                 </div>
-                <template v-for="(item, idx) in voiceStore.results" :key="idx">
-                  <Row :message="item.message" :time="item.time" :sender="item.sender" />
-                </template>
-                <Row v-if="voiceStore.runningText" :message="voiceStore.runningText" />
+                <div class="grid grid-cols-12 gap-y-2">
+                  <template v-for="(item, idx) in voiceStore.results" :key="idx">
+                    <Row :message="item.message" :time="item.time" :sender="item.sender" />
+                  </template>
+                  <Row v-if="voiceStore.runningText" :message="voiceStore.runningText" />
+                  <Row
+                    v-if="voiceStore.textOllama"
+                    :message="voiceStore.textOllama"
+                    :time="dateTime"
+                    sender="AI"
+                  />
+                </div>
               </div>
             </div>
             <FormSend />
@@ -35,12 +43,12 @@
 </template>
 <script lang="ts" setup>
 import FormSend from '@/components/v1/FormSend.vue'
-import Row from '@/components/v1/Row.vue'
+import Row from '@/components/v2/Row.vue'
 
 import { useVoiceChatStore } from '@/stores/voiceChat'
 import { computed } from 'vue'
-const voiceStore = useVoiceChatStore()
 
+const voiceStore = useVoiceChatStore()
 const dateTime = computed((): string => {
   var options = {
     weekday: 'long',

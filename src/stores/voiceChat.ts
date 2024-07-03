@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import ollama from 'ollama'
 
 /* eslint-disable */
 // @ts-ignore: Unreachable code error
@@ -17,6 +18,7 @@ export const useVoiceChatStore = defineStore('voiceChat', () => {
   const onRecord = ref(false)
   const results = ref<result[]>([])
   const textRecord = ref('')
+  const textOllama = ref('');
 
   const runningText = computed((): string => textRecord.value)
 
@@ -157,6 +159,7 @@ export const useVoiceChatStore = defineStore('voiceChat', () => {
     }
     // Speak error
     speakText.onerror = (e) => {
+      console.log(e);
       console.error('Something went wrong')
     }
 
@@ -175,14 +178,41 @@ export const useVoiceChatStore = defineStore('voiceChat', () => {
       })
     }
   }
+  
+  async function featchOllama(question: string) {
+    const testMessages = results.value.map((res) => {
+      return {
+        role: res.sender ? 'system' : 'user',
+        content: res.message ?? ""
+      };
+    })    
+    const response = await ollama.chat({ 
+      model: 'llama3:latest',
+      messages: testMessages,
+      stream: true 
+    })
+
+    for await (const part of response) {
+      textOllama.value += part.message.content
+    }
+    results.value.push({
+      message: textOllama.value,
+      time: getDateTime(),
+      sender: "AI"
+    })
+    textToSpeech(textOllama.value)
+    textOllama.value = '';
+  }
 
   return {
     onRecord,
     results,
     runningText,
+    textOllama,
     toggleRecord,
     textToSpeech,
     speechToTextV2,
-    addResult
+    addResult,
+    fetchAI: featchOllama
   }
 })
